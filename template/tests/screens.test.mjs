@@ -53,3 +53,9 @@ test('「打給家人」的群組通知有「我來打電話」按鈕，並帶�
   assert.equal(s.buttons[0].label, '我來打電話');
   assert.equal(s.buttons[0].data, 'a=claim_call&c=42');
 });
+
+test('「家人會打來」遇到很長的 LINE 名稱也不超過字數', () => {
+  const s = screens.callClaimed({ name: 'Christopher Wang 王大明' });
+  assert.deepEqual(checkLimits(s, LIMITS), []);
+  assert.equal(s.color, 'blue');
+});

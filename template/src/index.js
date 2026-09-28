@@ -147,7 +147,11 @@ async function handleClaim(env, ev, src, record, save, kind, now) {
     await save(next);
     await db.logEvent(env.DB, now, kind, record.id, name);
     // 回覆在群組裡，所有家人都看得到
-    return line.reply(env, ev.replyToken, toFamily(env, 'claimed', { name }));
+    await line.reply(env, ev.replyToken, toFamily(env, 'claimed', { name }));
+    // 「打給家人」有人接手時，也讓長輩知道誰會打來（主動推播，會計入額度）
+    const elder = kind === 'claim_call' && (await db.getBinding(env.DB, 'elder'));
+    if (elder) await safePush(env, elder, toElder(env, 'callClaimed', { name }), record.id, now);
+    return;
   }
   return line.reply(env, ev.replyToken, { type: 'text', text: `${record.claimed_by}已經在處理了` });
 }

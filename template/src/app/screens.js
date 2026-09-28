@@ -41,6 +41,14 @@ export const screens = {
     text: '已通知家人',
   }),
 
+  // 「打給家人」有家人接手 → 告訴長輩誰會打來（名字過長時截短，維持字數限制）
+  callClaimed: ({ name }) => ({
+    color: 'blue',
+    icon: '06_blue_call.png',
+    title: '家人會打來',
+    text: `${[...name].slice(0, 8).join('')}會打給你`,
+  }),
+
   // 給家屬群組
   alert: ({ time, med, reminderId }) => ({
     color: 'red',
@@ -72,10 +80,11 @@ export const SAMPLES = {
   done: {},
   alreadyDone: {},
   callSent: {},
+  callClaimed: { name: '小明' },
   callRequest: { callId: 1 },
   alert: { time: '08:00', med: '降血壓藥', reminderId: 1 },
   claimed: { name: '小明' },
 };
 
-export const ELDER_SCREENS = ['remind', 'snoozed', 'done', 'alreadyDone', 'callSent'];
+export const ELDER_SCREENS = ['remind', 'snoozed', 'done', 'alreadyDone', 'callSent', 'callClaimed'];
 export const FAMILY_SCREENS = ['alert', 'callRequest', 'claimed'];
