@@ -46,3 +46,10 @@ test('PWA manifest 列出的圖示檔都存在，且有可遮罩版', () => {
   }
   assert.ok(manifest.icons.some((i) => i.purpose === 'maskable'));
 });
+
+test('「打給家人」的群組通知有「我來打電話」按鈕，並帶著這次的紀錄編號', () => {
+  const s = screens.callRequest({ callId: 42 });
+  assert.equal(s.buttons.length, 1);
+  assert.equal(s.buttons[0].label, '我來打電話');
+  assert.equal(s.buttons[0].data, 'a=claim_call&c=42');
+});

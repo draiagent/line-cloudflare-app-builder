@@ -67,6 +67,25 @@ export function saveReminder(db, r) {
     .bind(r.status, r.remind_count, r.snoozed, r.snooze_count || 0, r.next_at ?? null, r.escalated, r.claimed_by ?? null, r.done_at ?? null, r.id).run();
 }
 
+// 長輩按「打給家人」的紀錄；家屬按「我來打電話」時記下是誰
+export async function createCallRequest(db, now) {
+  const res = await db.prepare('INSERT INTO call_requests (at) VALUES (?)').bind(now).run();
+  return res.meta.last_row_id;
+}
+
+export async function lastCallRequestAt(db) {
+  const row = await db.prepare('SELECT MAX(at) AS at FROM call_requests').first();
+  return row?.at || 0;
+}
+
+export function getCallRequest(db, id) {
+  return db.prepare('SELECT id, at, claimed_by FROM call_requests WHERE id = ?').bind(id).first();
+}
+
+export function saveCallClaim(db, id, name) {
+  return db.prepare('UPDATE call_requests SET claimed_by = ? WHERE id = ? AND claimed_by IS NULL').bind(name, id).run();
+}
+
 export function logEvent(db, now, kind, reminderId = null, detail = null) {
   return db.prepare('INSERT INTO events (at, kind, reminder_id, detail) VALUES (?, ?, ?, ?)')
     .bind(now, kind, reminderId, detail == null ? null : String(detail).slice(0, 500)).run();

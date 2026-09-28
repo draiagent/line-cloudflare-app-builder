@@ -116,23 +116,20 @@ async function handleEvent(ev, env) {
       if (src.userId === (await db.getBinding(env.DB, 'elder'))) return handleCallFamily(env, ev.replyToken, now);
       return;
     }
+    const fromFamily = src.type === 'group' && src.groupId === (await db.getBinding(env.DB, 'family'));
+    if (a === 'claim_call') {
+      const c = fromFamily && (await db.getCallRequest(env.DB, Number(p.get('c'))));
+      if (c) await handleClaim(env, ev, src, c, (n) => db.saveCallClaim(env.DB, n.id, n.claimed_by), 'claim_call', now);
+      return;
+    }
     const r = await db.getReminder(env.DB, Number(p.get('r')));
     if (!r) return;
 
     if ((a === 'done' || a === 'snooze') && src.userId === (await db.getBinding(env.DB, 'elder'))) {
       return applyPress(env, ev.replyToken, r, a, now);
     }
-    if (a === 'claim' && src.type === 'group' && src.groupId === (await db.getBinding(env.DB, 'family'))) {
-      const name = await line.groupMemberName(env, src.groupId, src.userId);
-      const { r: next, result } = claim(r, name);
-      if (result === 'claimed') {
-        await db.saveReminder(env.DB, next);
-        await db.logEvent(env.DB, now, 'claim', r.id, name);
-        // 回覆在群組裡，所有家人都看得到
-        await line.reply(env, ev.replyToken, toFamily(env, 'claimed', { name }));
-      } else {
-        await line.reply(env, ev.replyToken, { type: 'text', text: `${r.claimed_by}已經在處理了` });
-      }
+    if (a === 'claim' && fromFamily) {
+      await handleClaim(env, ev, src, r, (n) => db.saveReminder(env.DB, n), 'claim', now);
     }
     return;
   }
@@ -142,6 +139,19 @@ async function handleEvent(ev, env) {
   }
 }
 
+// 家屬按「我來打電話」：服藥通知與「打給家人」共用同一套接手規則
+async function handleClaim(env, ev, src, record, save, kind, now) {
+  const name = await line.groupMemberName(env, src.groupId, src.userId);
+  const { r: next, result } = claim(record, name);
+  if (result === 'claimed') {
+    await save(next);
+    await db.logEvent(env.DB, now, kind, record.id, name);
+    // 回覆在群組裡，所有家人都看得到
+    return line.reply(env, ev.replyToken, toFamily(env, 'claimed', { name }));
+  }
+  return line.reply(env, ev.replyToken, { type: 'text', text: `${record.claimed_by}已經在處理了` });
+}
+
 // 長輩按圖文選單「打給家人」→ 通知家屬群組。冷卻時間內重複按不再推播，但長輩一樣收到確認。
 async function handleCallFamily(env, replyToken, now) {
   const family = await db.getBinding(env.DB, 'family');
@@ -149,11 +159,10 @@ async function handleCallFamily(env, replyToken, now) {
     await db.logEvent(env.DB, now, 'call_family_unbound');
     return line.reply(env, replyToken, { type: 'text', text: REPLY.fallback });
   }
-  const last = Number(await db.getSetting(env.DB, 'last_call_family', '0'));
-  if (cooldownPassed(last, now, CALL_FAMILY_COOLDOWN_MIN)) {
-    await db.setSetting(env.DB, 'last_call_family', now);
-    await db.logEvent(env.DB, now, 'call_family');
-    await safePush(env, family, toFamily(env, 'callRequest', {}), null, now);
+  if (cooldownPassed(await db.lastCallRequestAt(env.DB), now, CALL_FAMILY_COOLDOWN_MIN)) {
+    const id = await db.createCallRequest(env.DB, now);
+    await db.logEvent(env.DB, now, 'call_family', id);
+    await safePush(env, family, toFamily(env, 'callRequest', { callId: id }), id, now);
   } else {
     await db.logEvent(env.DB, now, 'call_family_repeat');
   }

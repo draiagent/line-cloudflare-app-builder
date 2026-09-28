@@ -35,11 +35,17 @@ CREATE TABLE IF NOT EXISTS reminders (
   UNIQUE (schedule_id, local_date)
 );
 
+CREATE TABLE IF NOT EXISTS call_requests (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  at         INTEGER NOT NULL,     -- 長輩按「打給家人」的時間
+  claimed_by TEXT                  -- 按「我來打電話」的家人顯示名稱
+);
+
 CREATE TABLE IF NOT EXISTS events (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   at          INTEGER NOT NULL,
   kind        TEXT NOT NULL,
-  reminder_id INTEGER,
+  reminder_id INTEGER,              -- 提醒的 id；call_family／claim_call 事件時是 call_requests 的 id
   detail      TEXT
 );
 

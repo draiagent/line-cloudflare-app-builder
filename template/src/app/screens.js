@@ -50,11 +50,12 @@ export const screens = {
     buttons: [{ label: '我來打電話', data: `a=claim&r=${reminderId}`, color: 'blue' }],
   }),
   // 長輩按「打給家人」→ 家屬群組收到（功能請求，不帶狀態，用藍色）
-  callRequest: () => ({
+  callRequest: ({ callId }) => ({
     color: 'blue',
     icon: '06_blue_call.png',
     title: `${APP.elderName}找你`,
     text: `請打電話給${APP.elderName}`,
+    buttons: [{ label: '我來打電話', data: `a=claim_call&c=${callId}`, color: 'blue' }],
   }),
   claimed: ({ name }) => ({
     color: 'blue',
@@ -71,7 +72,7 @@ export const SAMPLES = {
   done: {},
   alreadyDone: {},
   callSent: {},
-  callRequest: {},
+  callRequest: { callId: 1 },
   alert: { time: '08:00', med: '降血壓藥', reminderId: 1 },
   claimed: { name: '小明' },
 };
