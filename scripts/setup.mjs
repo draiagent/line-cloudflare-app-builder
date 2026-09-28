@@ -1,7 +1,7 @@
 // 階段 2 一鍵設定：node scripts/setup.mjs <專案資料夾>
 // 讀 .env.local → 確認已被 git 忽略 → 建 D1 → 部署 → 寫入加密環境變數 → 設定並驗證 LINE Webhook。
 // 需要人登入或授權的步驟（wrangler login）會停下來請人自己做。全程不印出任何金鑰的值。
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { REQUIRED_KEYS, readEnv, envIgnored, readToml, tomlValue, wrangler, lineApi, report, summary, projectArg } from './lib.mjs';
 
@@ -78,6 +78,32 @@ if (info.ok) {
   const st = await lineApi(token, '/v2/bot/channel/webhook/endpoint');
   if (st.data?.active) report(true, 'Webhook 已啟用（Use webhook）');
   else report(null, 'Webhook 尚未啟用', '請到 LINE Developers → Messaging API → 開啟「Use webhook」');
+  await setupRichMenu(token);
+}
+
+// 圖文選單「打給家人」：整面一顆按鈕，按下 → 通知家屬群組。已有預設選單就不動，避免覆蓋。
+async function setupRichMenu(token) {
+  const img = join(project, 'line', 'line_richmenu_2500x843.png');
+  if (!existsSync(img)) return report(null, '找不到 line/line_richmenu_2500x843.png，略過圖文選單');
+  const cur = await lineApi(token, '/v2/bot/user/all/richmenu');
+  if (cur.ok && cur.data?.richMenuId) return report(true, '已有預設圖文選單，未變更');
+  const made = await lineApi(token, '/v2/bot/richmenu', 'POST', {
+    size: { width: 2500, height: 843 },
+    selected: true,
+    name: 'call-family',
+    chatBarText: '打給家人',
+    areas: [{ bounds: { x: 0, y: 0, width: 2500, height: 843 }, action: { type: 'postback', data: 'a=call_family', displayText: '打給家人' } }],
+  });
+  const id = made.data?.richMenuId;
+  if (!id) return report(false, `建立圖文選單失敗（${made.status}）`);
+  const up = await fetch(`https://api-data.line.me/v2/bot/richmenu/${id}/content`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'image/png' },
+    body: readFileSync(img),
+  });
+  if (!up.ok) return report(false, `上傳圖文選單圖片失敗（${up.status}）`);
+  const def = await lineApi(token, `/v2/bot/user/all/richmenu/${id}`, 'POST');
+  report(def.ok, def.ok ? '圖文選單「打給家人」已建立並設為預設' : `設為預設失敗（${def.status}）`);
 }
 
 // 9. 一定要人做的

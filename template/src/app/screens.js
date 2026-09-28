@@ -33,6 +33,13 @@ export const screens = {
     title: '記好了',
     text: '這次已經吃過了',
   }),
+  // 長輩按圖文選單「打給家人」後的確認
+  callSent: () => ({
+    color: 'blue',
+    icon: '06_blue_call.png',
+    title: '好的',
+    text: '已通知家人',
+  }),
 
   // 給家屬群組
   alert: ({ time, med, reminderId }) => ({
@@ -41,6 +48,13 @@ export const screens = {
     title: '還沒吃藥',
     text: `${APP.elderName}${time}${med}`,
     buttons: [{ label: '我來打電話', data: `a=claim&r=${reminderId}`, color: 'blue' }],
+  }),
+  // 長輩按「打給家人」→ 家屬群組收到（功能請求，不帶狀態，用藍色）
+  callRequest: () => ({
+    color: 'blue',
+    icon: '06_blue_call.png',
+    title: `${APP.elderName}找你`,
+    text: `請打電話給${APP.elderName}`,
   }),
   claimed: ({ name }) => ({
     color: 'blue',
@@ -56,9 +70,11 @@ export const SAMPLES = {
   snoozed: { minutes: 10 },
   done: {},
   alreadyDone: {},
+  callSent: {},
+  callRequest: {},
   alert: { time: '08:00', med: '降血壓藥', reminderId: 1 },
   claimed: { name: '小明' },
 };
 
-export const ELDER_SCREENS = ['remind', 'snoozed', 'done', 'alreadyDone'];
-export const FAMILY_SCREENS = ['alert', 'claimed'];
+export const ELDER_SCREENS = ['remind', 'snoozed', 'done', 'alreadyDone', 'callSent'];
+export const FAMILY_SCREENS = ['alert', 'callRequest', 'claimed'];

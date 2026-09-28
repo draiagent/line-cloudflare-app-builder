@@ -81,3 +81,11 @@ test('三種計時在測試模式不會落在同一分鐘', () => {
   const { snooze, noResponse, escalate } = TIMINGS.test;
   assert.equal(new Set([snooze, noResponse, escalate]).size, 3);
 });
+
+test('「打給家人」冷卻：第一次一定通知；5 分鐘內重複按不再通知；滿 5 分鐘再通知', async () => {
+  const { cooldownPassed } = await import('../src/core/engine.js');
+  const { CALL_FAMILY_COOLDOWN_MIN } = await import('../src/app/config.js');
+  assert.equal(cooldownPassed(0, T0, CALL_FAMILY_COOLDOWN_MIN), true);
+  assert.equal(cooldownPassed(T0, T0 + (CALL_FAMILY_COOLDOWN_MIN * MIN) - 1, CALL_FAMILY_COOLDOWN_MIN), false);
+  assert.equal(cooldownPassed(T0, T0 + CALL_FAMILY_COOLDOWN_MIN * MIN, CALL_FAMILY_COOLDOWN_MIN), true);
+});

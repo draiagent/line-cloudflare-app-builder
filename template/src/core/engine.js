@@ -50,6 +50,11 @@ export function press(r, action, now, t) {
   throw new Error(`未知的動作：${action}`);
 }
 
+// 距離上次超過 minutes 分鐘才算數（避免重複推播）
+export function cooldownPassed(lastAt, now, minutes) {
+  return !lastAt || now - lastAt >= minutes * MIN;
+}
+
 // 家屬按「我來打電話」
 export function claim(r, name) {
   if (r.claimed_by) return { r, result: 'already_claimed' };

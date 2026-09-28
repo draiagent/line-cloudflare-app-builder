@@ -17,6 +17,9 @@ export const LIMITS = { title: 5, total: 20, countButtons: true };
 // AI 自由回覆的上限與失敗時的預設回覆
 export const REPLY = { maxChars: 20, fallback: '收到了，謝謝' };
 
+// 圖文選單「打給家人」：幾分鐘內重複按只通知家屬群組一次
+export const CALL_FAMILY_COOLDOWN_MIN = 5;
+
 // 綁定模式最長幾分鐘
 export const BIND_MODE_MAX_MIN = 30;
 

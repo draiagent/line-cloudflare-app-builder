@@ -1,7 +1,7 @@
 ---
 name: line-cloudflare-app-builder
 description: 用標準骨架快速做出「LINE 提醒類」App（Cloudflare Workers＋D1＋每分鐘排程＋LINE Messaging API＋Gemini）。當使用者要做長輩服藥提醒、餐後血糖提醒、預約／報到提醒等「定時推播 → 按鈕回報 → 沒回應再提醒 → 通知家屬或群組」的 LINE App，或提到「line-cloudflare-app-builder」時使用。內含骨架、設定腳本、驗證腳本、畫面預覽與人工檢核清單。
-version: 0.2.0
+version: 0.3.0
 ---
 
 # LINE × Cloudflare App Builder
@@ -24,7 +24,7 @@ Agent 能接手所有「操作」，但接不走 **身份、授權、付款、�
 |---|---|
 | `template/` | 標準骨架，用 `scripts/new-app.mjs` 複製成新專案 |
 | `template/src/core/` | 共用：提醒狀態機、LINE、Flex 卡片、Gemini、安全閘、D1。**新 App 通常不改** |
-| `template/line/` | 官方帳號大頭貼（640×640）、圖文選單圖片（2500×843），手動上傳 |
+| `template/line/` | 官方帳號大頭貼（640×640，手動上傳）、圖文選單圖片（2500×843，`setup.mjs` 自動建立） |
 | `template/src/app/` | 業務層：`config.js`（時間、稱呼、AI 提示）、`screens.js`（畫面）。**新 App 主要改這裡** |
 | `scripts/new-app.mjs` | 建立新專案（不覆蓋既有檔案，合併 `.gitignore`） |
 | `scripts/preview.mjs` | 產生 LINE 畫面預覽頁與字數檢查 |
@@ -67,11 +67,11 @@ Agent 能接手所有「操作」，但接不走 **身份、授權、付款、�
 - 完全沒回應：`noResponse` 分鐘後再提醒一次；**按過「等一下」就不發這一則**。
 - `escalate` 分鐘仍沒按完成：通知家屬群組；**從原定時間起算，不因「等一下」延後**。
 - 家屬按「我來打電話」：在群組內回覆「某某會打電話」；第二個人按會被告知已有人處理。
+- 長輩按圖文選單「打給家人」：不直接撥電話，改為通知家屬群組（藍色）；`CALL_FAMILY_COOLDOWN_MIN`（預設 5 分鐘）內重複按只通知一次，長輩每次都收到「已通知家人」。圖文選單由 `setup.mjs` 建立，已有預設選單時不覆蓋。
 - 正式：10／15／30 分鐘；測試模式：1／2／3 分鐘（網頁 App 切換，不用改程式碼）。
 
 ## 已知限制
 
 - LINE 官方帳號後台的「自動回應訊息」、「允許加入群組」、大頭貼上傳沒有公開 API，保留為手動步驟。
-- 圖文選單「打給家人」只附圖片（`template/line/`），尚未用 LINE API 自動建立；撥打對象要由使用者決定。
 - 綁定靠「綁定模式」期間收到的加好友／入群事件；已經是好友的帳號要先封鎖再解除封鎖，才會再觸發加好友事件。
 - 目前只通過離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。

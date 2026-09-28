@@ -7,11 +7,11 @@
 import * as line from './core/line.js';
 import * as db from './core/db.js';
 import { card, checkLimits } from './core/flex.js';
-import { tick, press, claim, pickTimings } from './core/engine.js';
+import { tick, press, claim, pickTimings, cooldownPassed } from './core/engine.js';
 import { classify, parseSchedule } from './core/ai.js';
 import { safeReply, assertNotRedForElder } from './core/safety.js';
 import { MIN, taipeiParts, taipeiToUtcMs, isValidHHMM } from './core/time.js';
-import { TIMINGS, LIMITS, REPLY, BIND_MODE_MAX_MIN, PROMPTS } from './app/config.js';
+import { TIMINGS, LIMITS, REPLY, BIND_MODE_MAX_MIN, CALL_FAMILY_COOLDOWN_MIN, PROMPTS } from './app/config.js';
 import { screens } from './app/screens.js';
 
 const DAY = 24 * 60 * MIN;
@@ -111,9 +111,13 @@ async function handleEvent(ev, env) {
 
   if (ev.type === 'postback') {
     const p = new URLSearchParams(ev.postback.data);
+    const a = p.get('a');
+    if (a === 'call_family') {
+      if (src.userId === (await db.getBinding(env.DB, 'elder'))) return handleCallFamily(env, ev.replyToken, now);
+      return;
+    }
     const r = await db.getReminder(env.DB, Number(p.get('r')));
     if (!r) return;
-    const a = p.get('a');
 
     if ((a === 'done' || a === 'snooze') && src.userId === (await db.getBinding(env.DB, 'elder'))) {
       return applyPress(env, ev.replyToken, r, a, now);
@@ -136,6 +140,24 @@ async function handleEvent(ev, env) {
   if (ev.type === 'message' && src.type === 'user' && src.userId === (await db.getBinding(env.DB, 'elder'))) {
     return handleElderMessage(env, ev, now);
   }
+}
+
+// 長輩按圖文選單「打給家人」→ 通知家屬群組。冷卻時間內重複按不再推播，但長輩一樣收到確認。
+async function handleCallFamily(env, replyToken, now) {
+  const family = await db.getBinding(env.DB, 'family');
+  if (!family) {
+    await db.logEvent(env.DB, now, 'call_family_unbound');
+    return line.reply(env, replyToken, { type: 'text', text: REPLY.fallback });
+  }
+  const last = Number(await db.getSetting(env.DB, 'last_call_family', '0'));
+  if (cooldownPassed(last, now, CALL_FAMILY_COOLDOWN_MIN)) {
+    await db.setSetting(env.DB, 'last_call_family', now);
+    await db.logEvent(env.DB, now, 'call_family');
+    await safePush(env, family, toFamily(env, 'callRequest', {}), null, now);
+  } else {
+    await db.logEvent(env.DB, now, 'call_family_repeat');
+  }
+  return line.reply(env, replyToken, toElder(env, 'callSent', {}));
 }
 
 async function applyPress(env, replyToken, r, action, now) {
