@@ -3,7 +3,13 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-export const REQUIRED_KEYS = ['GEMINI_API_KEY', 'LINE_CHANNEL_SECRET', 'LINE_CHANNEL_ACCESS_TOKEN', 'APP_ADMIN_PASSWORD'];
+const BASE_KEYS = ['LINE_CHANNEL_SECRET', 'LINE_CHANNEL_ACCESS_TOKEN', 'APP_ADMIN_PASSWORD'];
+
+// 依 wrangler.toml 的 AI_PROVIDER 決定要哪一把 AI 金鑰
+export function requiredKeys(toml) {
+  const ai = tomlValue(toml, 'AI_PROVIDER') === 'openai' ? 'OPENAI_API_KEY' : 'GEMINI_API_KEY';
+  return [ai, ...BASE_KEYS];
+}
 
 export function readEnv(project) {
   const p = join(project, '.env.local');

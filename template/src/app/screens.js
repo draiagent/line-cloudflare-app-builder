@@ -1,5 +1,5 @@
 // ===== 業務畫面：每個畫面一個大圖示（public/icons/）＋短標題＋一句話＋最多兩個按鈕 =====
-// 顏色規則（依講義）：紅＝警示（只給家屬）、黃＝提醒與「等一下」、綠＝通過與「吃好了」、藍＝功能、不帶狀態。
+// 顏色規則（依講義）：紅＝警示（只給家屬）、黃＝提醒與「等一下」、綠＝通過與「我已吃藥了」、藍＝功能、不帶狀態。
 
 import { APP } from './config.js';
 
@@ -11,7 +11,7 @@ export const screens = {
     title: '吃藥囉',
     text: med,
     buttons: [
-      { label: '吃好了', data: `a=done&r=${reminderId}`, color: 'green' },
+      { label: '我已吃藥了', data: `a=done&r=${reminderId}`, color: 'green' },
       { label: '等一下', data: `a=snooze&r=${reminderId}`, color: 'yellow' },
     ],
   }),

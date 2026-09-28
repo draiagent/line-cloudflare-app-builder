@@ -59,3 +59,10 @@ test('「家人會打來」遇到很長的 LINE 名稱也不超過字數', () =>
   assert.deepEqual(checkLimits(s, LIMITS), []);
   assert.equal(s.color, 'blue');
 });
+
+test('子女網頁 App 的按鈕至少 44×44px', () => {
+  const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+  const rule = html.match(/\n\s*button \{[^}]*\}/)[0];
+  assert.match(rule, /min-width:44px/);
+  assert.match(rule, /min-height:44px/);
+});

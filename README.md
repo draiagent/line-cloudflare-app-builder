@@ -1,19 +1,19 @@
 # LINE × Cloudflare App Builder
 
-[![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](CHANGELOG.md)
 
 > 把「LINE 提醒類 App」的開發流程封裝成 Claude Skill：標準骨架＋設定腳本＋驗證腳本＋人工檢核清單。新 App 只改業務邏輯。
 
 這是《從許願到部署：AI 打造長輩服藥助理 App 實作講義》中 **L3 範本＋Skill 版** 的實作。第一個案例是「長輩服藥與健康回報管理助理」；同一套骨架可以延伸到餐後血糖提醒、預約提醒、課程報到提醒。
 
-> ⚠️ **v0.6.0 狀態**：骨架依講義規格撰寫，已通過 35 項離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。第一次使用請照 [checklist.md](checklist.md) 完整走一遍。
+> ⚠️ **v0.7.0 狀態**：骨架依講義規格撰寫，已通過 43 項離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。第一次使用請照 [checklist.md](checklist.md) 完整走一遍。
 
 ## 能做什麼
 
 | 誰 | 用什麼 | 做什麼 |
 |---|---|---|
 | 子女／照顧者 | 網頁 App（可加到主畫面） | 用語音或打字設定每日提醒、看最近 7 天紀錄、切換測試模式、綁定 LINE |
-| 長輩 | 只有 LINE | 收提醒，按「吃好了」或「等一下」；打字、貼圖、語音由 AI 判讀；按圖文選單「打給家人」通知家屬群組 |
+| 長輩 | 只有 LINE | 收提醒，按「我已吃藥了」或「等一下」；打字、貼圖、語音由 AI 判讀；按圖文選單「打給家人」通知家屬群組 |
 | 家屬群組 | LINE 群組 | 長輩按「打給家人」時收到通知，一樣可以按「我來打電話」接手，長輩會收到「某某會打給你」 |
 | 家屬群組 | LINE 群組 | 30 分鐘沒吃才收到通知，按「我來打電話」避免大家同時打，長輩會收到「某某會打給你」 |
 
@@ -53,7 +53,7 @@ line-cloudflare-app-builder/
 │  ├─ verify.mjs                金鑰外洩、單元測試、線上 Webhook 檢查
 │  └─ lib.mjs
 ├─ template/                    標準骨架（Cloudflare Worker）
-│  ├─ src/core/                 共用：狀態機、LINE、Flex、Gemini、安全閘、D1
+│  ├─ src/core/                 共用：狀態機、LINE、Flex、AI（Gemini／ChatGPT）、安全閘、D1
 │  ├─ src/app/                  業務層：config.js、screens.js（新 App 改這裡）
 │  ├─ public/                   子女網頁 App、manifest、PWA 圖示與狀態圖示
 │  ├─ line/                     官方帳號大頭貼（手動上傳）、圖文選單圖片（自動建立）
@@ -80,6 +80,6 @@ line-cloudflare-app-builder/
 
 ## Version
 
-**v0.6.0 — 2026-09-28**
+**v0.7.0 — 2026-09-28**
 
 **AI Coach 益力康陳董 | 2026 AI to Agent**

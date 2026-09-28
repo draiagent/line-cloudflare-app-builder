@@ -189,7 +189,7 @@ async function handleElderMessage(env, ev, now) {
     let input;
     if (m.type === 'text') input = { text: m.text };
     else if (m.type === 'sticker') input = { text: `（長輩傳了貼圖，關鍵字：${(m.keywords || []).join('、') || '無'}）` };
-    else if (m.type === 'audio') input = { audio: { mime: 'audio/mp4', base64: line.toBase64(await line.getContent(env, m.id)) } };
+    else if (m.type === 'audio') input = { audio: { mime: 'audio/mp4', bytes: await line.getContent(env, m.id) } };
     else input = { text: `（長輩傳了${m.type}）` };
 
     const { intent, reply } = await classify(env, PROMPTS, input);

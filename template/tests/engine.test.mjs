@@ -22,7 +22,7 @@ function run(r, from, to, t) {
 for (const mode of ['test', 'live']) {
   const t = pickTimings(mode === 'test', TIMINGS);
 
-  test(`[${mode}] 按「吃好了」→ 記錄完成，之後沒有任何動作`, () => {
+  test(`[${mode}] 按「我已吃藥了」→ 記錄完成，之後沒有任何動作`, () => {
     const { r } = press(fresh(), 'done', T0 + 30_000, t);
     assert.equal(r.status, 'done');
     assert.deepEqual(run(r, 0, t.escalate + 5, t).log, []);
@@ -52,7 +52,7 @@ for (const mode of ['test', 'live']) {
     if (t.snooze !== t.noResponse) assert.ok(!reminds.includes(t.noResponse));
   });
 
-  test(`[${mode}] 已通知家屬後才按「吃好了」→ 記錄完成、不再重複通知`, () => {
+  test(`[${mode}] 已通知家屬後才按「我已吃藥了」→ 記錄完成、不再重複通知`, () => {
     const out = run(fresh(), 0, t.escalate, t);
     const { r } = press(out.r, 'done', T0 + (t.escalate + 1) * MIN, t);
     assert.equal(r.status, 'done');

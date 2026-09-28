@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0] - 2026-09-28
+
+依 VAC 圖卡對齊規格。
+
+### Added
+- AI 可在 Gemini 與 ChatGPT 之間切換：`wrangler.toml` 的 `AI_PROVIDER`（`gemini`／`openai`）、`OPENAI_MODEL`、`OPENAI_TRANSCRIBE_MODEL`（ChatGPT 路線的長輩語音先轉文字）；`.env.local` 只需填所選那一家的金鑰，`setup.mjs` 依此檢查。
+- 子女網頁 App 主要按鈕至少 44×44px（長輩 LINE 按鈕維持 56px 以上的規範）；手機 360–430px 寬不橫向溢出列入驗收。
+- 單元測試共 43 項（新增 AI 切換、44px 按鈕）。
+
+### Changed
+- 長輩提醒的完成按鈕改為「我已吃藥了」；關鍵字判讀同步支援。綠色狀態圖示仍印「吃好了」，待換新圖示。
+- 階段 1、2、3 提示詞與檢核清單同步更新。
+
 ## [0.6.0] - 2026-09-28
 
 ### Changed

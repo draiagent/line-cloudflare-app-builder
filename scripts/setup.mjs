@@ -3,7 +3,7 @@
 // 需要人登入或授權的步驟（wrangler login）會停下來請人自己做。全程不印出任何金鑰的值。
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { REQUIRED_KEYS, readEnv, envIgnored, readToml, tomlValue, wrangler, lineApi, report, summary, projectArg } from './lib.mjs';
+import { requiredKeys, readEnv, envIgnored, readToml, tomlValue, wrangler, lineApi, report, summary, projectArg } from './lib.mjs';
 
 const project = resolve(projectArg());
 const stop = (label, hint) => { report(false, label, hint); summary(); process.exit(1); };
@@ -11,9 +11,10 @@ const stop = (label, hint) => { report(false, label, hint); summary(); process.e
 // 1. 金鑰檔
 const env = readEnv(project);
 if (!env) stop('找不到 .env.local', '把 .env.local.example 複製成 .env.local 並填值');
+const REQUIRED_KEYS = requiredKeys(readToml(project));
 const missing = REQUIRED_KEYS.filter((k) => !env[k]);
 if (missing.length) stop(`.env.local 缺少：${missing.join('、')}`);
-report(true, `.env.local 四個欄位都有值（${REQUIRED_KEYS.join('、')}）`);
+report(true, `.env.local 必填欄位都有值（${REQUIRED_KEYS.join('、')}）`);
 
 // 2. 不可上傳
 if (!envIgnored(project)) stop('.env.local 沒有被 .gitignore 排除', '先修好 .gitignore，再重跑');
@@ -109,6 +110,8 @@ async function setupRichMenu(token) {
 // 9. 一定要人做的
 report(null, '官方帳號「自動回應訊息」', '沒有公開 API 可關，請到 LINE Official Account Manager 手動關閉');
 report(null, '官方帳號「允許加入群組」', '請到 LINE Official Account Manager 手動開啟');
-if (!tomlValue(toml, 'GEMINI_MODEL')) report(null, 'GEMINI_MODEL 尚未填寫', '查證目前可用、有免費額度的模型，填入 wrangler.toml 後重新部署；未填時只用關鍵字判讀');
+const ai = tomlValue(toml, 'AI_PROVIDER') === 'openai' ? 'OPENAI_MODEL' : 'GEMINI_MODEL';
+if (!tomlValue(toml, ai)) report(null, `${ai} 尚未填寫`, '查證目前可用的模型，填入 wrangler.toml 後重新部署；未填時只用關鍵字判讀');
+if (ai === 'OPENAI_MODEL' && !tomlValue(toml, 'OPENAI_TRANSCRIBE_MODEL')) report(null, 'OPENAI_TRANSCRIBE_MODEL 尚未填寫', '長輩的語音訊息需要它轉文字；未填時語音只會收到預設回覆');
 
 process.exit(summary() ? 1 : 0);

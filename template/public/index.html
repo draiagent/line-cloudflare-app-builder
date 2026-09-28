@@ -17,7 +17,7 @@
   h1 { font-size:28px; margin:8px 0 16px; }
   h2 { font-size:22px; margin:0 0 12px; }
   section { background:#fff; border-radius:16px; padding:16px; margin-bottom:16px; }
-  button { font:inherit; font-weight:700; border:0; border-radius:12px; padding:14px 18px; background:var(--blue); color:#fff; cursor:pointer; }
+  button { font:inherit; font-weight:700; border:0; border-radius:12px; padding:14px 18px; background:var(--blue); color:#fff; cursor:pointer; min-width:44px; min-height:44px; } /* 主要按鈕 ≥ 44×44px */
   button.secondary { background:#E3EAF5; color:var(--blue); }
   button.danger { background:#fff; color:var(--red); border:2px solid var(--red); padding:8px 12px; }
   input { font:inherit; width:100%; padding:12px; border:2px solid var(--line); border-radius:12px; }
@@ -127,7 +127,7 @@ async function refresh() {
   const { reminders } = await api('/api/logs?days=7');
   const tb = $('logs'); tb.replaceChildren();
   for (const r of reminders) {
-    const result = r.status === 'done' ? '✅ 吃好了' : r.escalated ? '⚠️ 已通知家屬' + (r.claimed_by ? `（${r.claimed_by}接手）` : '') : '⏳ 等待中';
+    const result = r.status === 'done' ? '✅ 已吃藥' : r.escalated ? '⚠️ 已通知家屬' + (r.claimed_by ? `（${r.claimed_by}接手）` : '') : '⏳ 等待中';
     const tr = document.createElement('tr');
     for (const v of [r.local_date.slice(5), r.time, r.med, result + (r.snooze_count ? `，等一下×${r.snooze_count}` : '')]) {
       const td = document.createElement('td'); td.textContent = v; tr.append(td);
