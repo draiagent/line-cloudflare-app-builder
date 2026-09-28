@@ -139,7 +139,7 @@ async function handleEvent(ev, env) {
   }
 }
 
-// 家屬按「我來打電話」：服藥通知與「打給家人」共用同一套接手規則
+// 家屬按「我來打電話」：服藥通知與「打給家人」共用同一套接手規則，接手後通知群組與長輩
 async function handleClaim(env, ev, src, record, save, kind, now) {
   const name = await line.groupMemberName(env, src.groupId, src.userId);
   const { r: next, result } = claim(record, name);
@@ -148,8 +148,8 @@ async function handleClaim(env, ev, src, record, save, kind, now) {
     await db.logEvent(env.DB, now, kind, record.id, name);
     // 回覆在群組裡，所有家人都看得到
     await line.reply(env, ev.replyToken, toFamily(env, 'claimed', { name }));
-    // 「打給家人」有人接手時，也讓長輩知道誰會打來（主動推播，會計入額度）
-    const elder = kind === 'claim_call' && (await db.getBinding(env.DB, 'elder'));
+    // 也讓長輩知道誰會打來（主動推播，會計入額度）
+    const elder = await db.getBinding(env.DB, 'elder');
     if (elder) await safePush(env, elder, toElder(env, 'callClaimed', { name }), record.id, now);
     return;
   }
