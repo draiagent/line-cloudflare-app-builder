@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0] - 2026-09-28
+
+### Added
+- 換用新的 App 圖示包：PWA 圖示 192、512、可遮罩 512、iPhone 180、網頁 32，`manifest.json`（App 名稱「吃藥小幫手」）。
+- `template/line/`：官方帳號大頭貼 640×640、圖文選單「打給家人」2500×843（圖片；尚未自動建立）。
+- 單元測試：檢查 manifest 列出的圖示檔都存在。
+
+### Changed
+- 子女網頁 App 標題改為「吃藥小幫手」，加入 favicon 與 iPhone 主畫面圖示；`manifest.webmanifest` 改為 `manifest.json`。
+- `scripts/new-app.mjs`：專案資料夾裡已有、且內容完全相同的檔案（例如先放好的圖示）直接略過，不再視為衝突。
+
 ## [0.1.0] - 2026-09-28
 
 ### Added

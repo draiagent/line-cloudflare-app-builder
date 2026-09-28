@@ -21,7 +21,7 @@ Claude 無法代勞、必須由人親自完成的步驟：**身份、授權、�
 - [ ] 確認 Webhook 已啟用（setup 顯示 ⚠️ 時，到 LINE Developers → Messaging API 開啟「Use webhook」）
 - [ ] 關閉官方帳號的「自動回應訊息」（LINE Official Account Manager）
 - [ ] 在後台允許官方帳號「加入群組」
-- [ ] 上傳官方帳號大頭貼
+- [ ] 上傳官方帳號大頭貼（`line/line-oa-avatar.png`）
 - [ ] 依 Claude 試算結果確認 LINE 推播方案
 
 ### 手機測試（測試模式：等一下 1 分鐘、沒回應 2 分鐘、通知家屬 3 分鐘）

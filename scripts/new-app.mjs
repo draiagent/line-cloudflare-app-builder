@@ -1,5 +1,5 @@
 // 從 template/ 建立新 App：node scripts/new-app.mjs <專案資料夾> <app-name>
-// - 資料夾可以已存在（例如已放好圖示與 .env.local），但不會覆蓋任何既有檔案。
+// - 資料夾可以已存在（例如已放好圖示與 .env.local），但不會覆蓋任何既有檔案；內容完全相同的檔案直接略過。
 // - 既有的 .gitignore 會合併缺少的規則，不會整份取代。
 import { cpSync, existsSync, readdirSync, readFileSync, writeFileSync, statSync, mkdirSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
@@ -21,7 +21,8 @@ function walk(dir) {
 }
 
 const files = walk(TEMPLATE).map((p) => relative(TEMPLATE, p));
-const conflicts = files.filter((f) => f !== '.gitignore' && existsSync(join(target, f)));
+const same = (f) => readFileSync(join(target, f)).equals(readFileSync(join(TEMPLATE, f)));
+const conflicts = files.filter((f) => f !== '.gitignore' && existsSync(join(target, f)) && !same(f));
 if (conflicts.length) {
   console.error('以下檔案已存在，為避免覆蓋已中止：\n' + conflicts.map((f) => '  ' + f).join('\n'));
   process.exit(1);
@@ -37,6 +38,7 @@ for (const f of files) {
     console.log(`合併 .gitignore（新增 ${add.length} 條）`);
     continue;
   }
+  if (existsSync(dst)) continue; // 內容相同，已在上面確認
   mkdirSync(dirname(dst), { recursive: true });
   cpSync(join(TEMPLATE, f), dst);
 }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { screens, SAMPLES, ELDER_SCREENS, FAMILY_SCREENS } from '../src/app/screens.js';
 import { LIMITS, TIMINGS } from '../src/app/config.js';
 import { card, checkLimits, COLORS } from '../src/core/flex.js';
@@ -37,4 +37,12 @@ test('長輩永遠不會收到紅色畫面', () => {
 
 test('黃底畫面一律用深色字', () => {
   assert.equal(COLORS.yellow.fg, '#3D2B00');
+});
+
+test('PWA manifest 列出的圖示檔都存在，且有可遮罩版', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../public/manifest.json', import.meta.url), 'utf8'));
+  for (const icon of manifest.icons) {
+    assert.ok(existsSync(new URL(`../public${icon.src}`, import.meta.url)), `找不到 ${icon.src}`);
+  }
+  assert.ok(manifest.icons.some((i) => i.purpose === 'maskable'));
 });

@@ -1,7 +1,7 @@
 ---
 name: line-cloudflare-app-builder
 description: 用標準骨架快速做出「LINE 提醒類」App（Cloudflare Workers＋D1＋每分鐘排程＋LINE Messaging API＋Gemini）。當使用者要做長輩服藥提醒、餐後血糖提醒、預約／報到提醒等「定時推播 → 按鈕回報 → 沒回應再提醒 → 通知家屬或群組」的 LINE App，或提到「line-cloudflare-app-builder」時使用。內含骨架、設定腳本、驗證腳本、畫面預覽與人工檢核清單。
-version: 0.1.0
+version: 0.2.0
 ---
 
 # LINE × Cloudflare App Builder
@@ -24,6 +24,7 @@ Agent 能接手所有「操作」，但接不走 **身份、授權、付款、�
 |---|---|
 | `template/` | 標準骨架，用 `scripts/new-app.mjs` 複製成新專案 |
 | `template/src/core/` | 共用：提醒狀態機、LINE、Flex 卡片、Gemini、安全閘、D1。**新 App 通常不改** |
+| `template/line/` | 官方帳號大頭貼（640×640）、圖文選單圖片（2500×843），手動上傳 |
 | `template/src/app/` | 業務層：`config.js`（時間、稱呼、AI 提示）、`screens.js`（畫面）。**新 App 主要改這裡** |
 | `scripts/new-app.mjs` | 建立新專案（不覆蓋既有檔案，合併 `.gitignore`） |
 | `scripts/preview.mjs` | 產生 LINE 畫面預覽頁與字數檢查 |
@@ -71,6 +72,6 @@ Agent 能接手所有「操作」，但接不走 **身份、授權、付款、�
 ## 已知限制
 
 - LINE 官方帳號後台的「自動回應訊息」、「允許加入群組」、大頭貼上傳沒有公開 API，保留為手動步驟。
-- 本版未實作講義提到的圖文選單（「打給家人」）與 PWA 多尺寸圖示（192／512／可遮罩／180／32）。
+- 圖文選單「打給家人」只附圖片（`template/line/`），尚未用 LINE API 自動建立；撥打對象要由使用者決定。
 - 綁定靠「綁定模式」期間收到的加好友／入群事件；已經是好友的帳號要先封鎖再解除封鎖，才會再觸發加好友事件。
-- v0.1.0 只通過離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。
+- 目前只通過離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。
