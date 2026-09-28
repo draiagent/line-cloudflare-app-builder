@@ -1,0 +1,20 @@
+# 由 scripts/new-app.mjs 填入 App 名稱；database_id 與 PUBLIC_URL 由 scripts/setup.mjs 填入。
+name = "__APP_NAME__"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[triggers]
+crons = ["* * * * *"] # 每分鐘檢查一次提醒
+
+[[d1_databases]]
+binding = "DB"
+database_name = "__APP_NAME__-db"
+database_id = "__D1_ID__"
+
+[vars]
+PUBLIC_URL = ""   # 部署後的 https 網址（圖示網址會用到）
+GEMINI_MODEL = "" # 部署前查證當時可用、有免費額度的模型名稱再填

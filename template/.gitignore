@@ -1,0 +1,12 @@
+# 金鑰（絕不可上傳）
+.env
+.env.*
+!.env.local.example
+.dev.vars
+
+# Cloudflare / Node
+.wrangler/
+node_modules/
+
+# 預覽頁（由 scripts/preview.mjs 產生）
+preview/

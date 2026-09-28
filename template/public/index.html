@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>服藥提醒管理</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/01_app_icon.png">
+<meta name="theme-color" content="#1565C0">
+<style>
+  :root { --blue:#1565C0; --green:#138A3E; --yellow:#FFC61A; --red:#D7263D; --ink:#1A1A1A; --muted:#555; --line:#DDD; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:20px; color:var(--ink); background:#F4F6F9; }
+  main { max-width:640px; margin:0 auto; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 16px; }
+  h2 { font-size:22px; margin:0 0 12px; }
+  section { background:#fff; border-radius:16px; padding:16px; margin-bottom:16px; }
+  button { font:inherit; font-weight:700; border:0; border-radius:12px; padding:14px 18px; background:var(--blue); color:#fff; cursor:pointer; }
+  button.secondary { background:#E3EAF5; color:var(--blue); }
+  button.danger { background:#fff; color:var(--red); border:2px solid var(--red); padding:8px 12px; }
+  input { font:inherit; width:100%; padding:12px; border:2px solid var(--line); border-radius:12px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+  .row > input { flex:1; min-width:120px; }
+  .pill { display:inline-block; padding:4px 12px; border-radius:999px; font-weight:700; }
+  .ok { background:#DDF3E4; color:var(--green); }
+  .no { background:#FDE2E5; color:var(--red); }
+  .warn { background:var(--yellow); color:#3D2B00; }
+  .muted { color:var(--muted); font-size:17px; }
+  ul { list-style:none; padding:0; margin:0; }
+  li { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+  table { width:100%; border-collapse:collapse; font-size:17px; }
+  td, th { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); }
+  #confirm { background:#FFF8E1; border-radius:12px; padding:12px; margin-top:12px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>服藥提醒管理</h1>
+  <p class="muted">本系統只是輔助提醒，不能取代家人的實際關心。</p>
+
+  <section id="login">
+    <h2>請輸入管理密碼</h2>
+    <div class="row"><input id="pw" type="password" autocomplete="current-password"><button id="loginBtn">登入</button></div>
+    <p class="muted" id="loginMsg"></p>
+  </section>
+
+  <div id="app" hidden>
+    <section>
+      <h2>狀態</h2>
+      <p>長輩 LINE：<span id="stElder" class="pill"></span></p>
+      <p>家屬群組：<span id="stFamily" class="pill"></span></p>
+      <p>模式：<span id="stMode" class="pill"></span> <span class="muted" id="stTimings"></span></p>
+      <div class="row">
+        <button id="bindBtn" class="secondary">開啟綁定（10 分鐘）</button>
+        <button id="modeBtn" class="secondary"></button>
+      </div>
+      <p class="muted" id="bindMsg"></p>
+    </section>
+
+    <section>
+      <h2>新增提醒</h2>
+      <p class="muted">例如：「提醒媽媽每天早上8點、晚上7點吃降血壓藥」</p>
+      <div class="row"><button id="micBtn">🎤 用說的</button></div>
+      <div class="row"><input id="say" placeholder="或直接打字"><button id="parseBtn" class="secondary">整理</button></div>
+      <div id="confirm" hidden>
+        <p id="confirmText"></p>
+        <div class="row"><button id="okBtn">對，建立</button><button id="cancelBtn" class="secondary">不對</button></div>
+      </div>
+      <details class="muted" style="margin-top:12px">
+        <summary>手動輸入</summary>
+        <div class="row"><input id="med" placeholder="藥名"><input id="time" type="time"><button id="addBtn" class="secondary">加入</button></div>
+      </details>
+    </section>
+
+    <section>
+      <h2>目前的提醒</h2>
+      <ul id="schedules"></ul>
+    </section>
+
+    <section>
+      <h2>最近 7 天紀錄</h2>
+      <table><thead><tr><th>日期</th><th>時間</th><th>藥</th><th>結果</th></tr></thead><tbody id="logs"></tbody></table>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let pw = '';
+try { pw = sessionStorage.getItem('pw') || ''; } catch {}
+let pending = [];
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + pw } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || '發生問題，請稍後再試');
+  return data;
+}
+
+function pill(el, ok, yes, no) { el.textContent = ok ? yes : no; el.className = 'pill ' + (ok ? 'ok' : 'no'); }
+
+async function refresh() {
+  const s = await api('/api/status');
+  pill($('stElder'), s.elderBound, '已綁定', '未綁定');
+  pill($('stFamily'), s.familyBound, '已綁定', '未綁定');
+  $('stMode').textContent = s.testMode ? '測試模式' : '正式';
+  $('stMode').className = 'pill ' + (s.testMode ? 'warn' : 'ok');
+  $('stTimings').textContent = `等一下 ${s.timings.snooze}／沒回應 ${s.timings.noResponse}／通知家屬 ${s.timings.escalate} 分鐘`;
+  $('modeBtn').textContent = s.testMode ? '切回正式時間' : '開啟測試模式';
+  $('modeBtn').onclick = async () => { await api('/api/test-mode', { method: 'POST', body: JSON.stringify({ on: !s.testMode }) }); refresh(); };
+  $('bindMsg').textContent = s.bindUntil > Date.now()
+    ? `綁定中，到 ${new Date(s.bindUntil).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei' })}：此時加好友的帳號會成為長輩，被邀入的群組會成為家屬群組。` : '';
+
+  const list = $('schedules'); list.replaceChildren();
+  for (const x of await api('/api/schedules')) {
+    const li = document.createElement('li');
+    const span = document.createElement('span'); span.textContent = `${x.time}　${x.med}`;
+    const del = document.createElement('button'); del.className = 'danger'; del.textContent = '刪除';
+    del.onclick = async () => { if (confirm(`刪除 ${x.time} ${x.med}？`)) { await api('/api/schedules/' + x.id, { method: 'DELETE' }); refresh(); } };
+    li.append(span, del); list.append(li);
+  }
+  if (!list.children.length) list.innerHTML = '<li class="muted">還沒有提醒</li>';
+
+  const { reminders } = await api('/api/logs?days=7');
+  const tb = $('logs'); tb.replaceChildren();
+  for (const r of reminders) {
+    const result = r.status === 'done' ? '✅ 吃好了' : r.escalated ? '⚠️ 已通知家屬' + (r.claimed_by ? `（${r.claimed_by}接手）` : '') : '⏳ 等待中';
+    const tr = document.createElement('tr');
+    for (const v of [r.local_date.slice(5), r.time, r.med, result + (r.snooze_count ? `，等一下×${r.snooze_count}` : '')]) {
+      const td = document.createElement('td'); td.textContent = v; tr.append(td);
+    }
+    tb.append(tr);
+  }
+}
+
+async function start() {
+  try { await refresh(); $('login').hidden = true; $('app').hidden = false; }
+  catch (e) { $('loginMsg').textContent = e.message; }
+}
+
+$('loginBtn').onclick = () => { pw = $('pw').value; try { sessionStorage.setItem('pw', pw); } catch {} start(); };
+$('bindBtn').onclick = async () => { await api('/api/bind-mode', { method: 'POST', body: JSON.stringify({ minutes: 10 }) }); refresh(); };
+
+async function parse(text) {
+  try {
+    const { items } = await api('/api/parse', { method: 'POST', body: JSON.stringify({ text }) });
+    if (!items.length) { alert('聽不出時間，請再說一次或手動輸入'); return; }
+    pending = items;
+    $('confirmText').textContent = '每天 ' + items.map((i) => `${i.time} 提醒吃${i.med}`).join('、') + '，對嗎？';
+    $('confirm').hidden = false;
+  } catch (e) { alert(e.message); }
+}
+$('parseBtn').onclick = () => $('say').value.trim() && parse($('say').value.trim());
+$('okBtn').onclick = async () => {
+  for (const i of pending) await api('/api/schedules', { method: 'POST', body: JSON.stringify(i) });
+  pending = []; $('confirm').hidden = true; $('say').value = ''; refresh();
+};
+$('cancelBtn').onclick = () => { pending = []; $('confirm').hidden = true; };
+$('addBtn').onclick = async () => {
+  try { await api('/api/schedules', { method: 'POST', body: JSON.stringify({ med: $('med').value, time: $('time').value }) }); refresh(); }
+  catch (e) { alert(e.message); }
+};
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) $('micBtn').hidden = true;
+else $('micBtn').onclick = () => {
+  const rec = new SR(); rec.lang = 'zh-TW';
+  $('micBtn').textContent = '🎤 請說…';
+  rec.onresult = (e) => { const t = e.results[0][0].transcript; $('say').value = t; parse(t); };
+  rec.onend = () => { $('micBtn').textContent = '🎤 用說的'; };
+  rec.start();
+};
+
+if (pw) start();
+</script>
+</body>
+</html>
