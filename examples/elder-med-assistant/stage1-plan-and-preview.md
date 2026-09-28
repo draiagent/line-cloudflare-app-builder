@@ -24,7 +24,7 @@
 - 圖示使用 png/ 資料夾（Flex Message 不支援 SVG；svg/ 只是原始檔）：
   - 02_yellow_remind.png「吃藥囉」→ 提醒、再提醒
   - 04_yellow_wait.png「等一下」→ 長輩按「等一下」後的回覆
-  - 03_green_done.png「吃好了」→ 完成
+  - 03_green_done.png「我已吃藥了」→ 完成
   - 05_red_not_taken.png「還沒吃」→ 家屬群組通知（只發給家屬）
   - 06_blue_call.png「打電話」→ 家屬的「我來打電話」
 - 顏色規則固定：紅＝警示、黃＝提醒、綠＝通過、藍＝功能按鈕。

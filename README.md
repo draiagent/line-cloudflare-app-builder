@@ -1,12 +1,12 @@
 # LINE × Cloudflare App Builder
 
-[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.1-blue.svg)](CHANGELOG.md)
 
 > 把「LINE 提醒類 App」的開發流程封裝成 Claude Skill：標準骨架＋設定腳本＋驗證腳本＋人工檢核清單。新 App 只改業務邏輯。
 
 這是《從許願到部署：AI 打造長輩服藥助理 App 實作講義》中 **L3 範本＋Skill 版** 的實作。第一個案例是「長輩服藥與健康回報管理助理」；同一套骨架可以延伸到餐後血糖提醒、預約提醒、課程報到提醒。
 
-> ⚠️ **v0.7.0 狀態**：骨架依講義規格撰寫，已通過 43 項離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。第一次使用請照 [checklist.md](checklist.md) 完整走一遍。
+> ⚠️ **v0.7.1 狀態**：骨架依講義規格撰寫，已通過 43 項離線單元測試，**尚未實際部署到 Cloudflare 與 LINE 驗證**。第一次使用請照 [checklist.md](checklist.md) 完整走一遍。
 
 ## 能做什麼
 
@@ -80,6 +80,6 @@ line-cloudflare-app-builder/
 
 ## Version
 
-**v0.7.0 — 2026-09-28**
+**v0.7.1 — 2026-09-28**
 
 **AI Coach 益力康陳董 | 2026 AI to Agent**

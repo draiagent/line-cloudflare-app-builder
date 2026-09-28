@@ -1,7 +1,7 @@
 ---
 name: line-cloudflare-app-builder
 description: 用標準骨架快速做出「LINE 提醒類」App（Cloudflare Workers＋D1＋每分鐘排程＋LINE Messaging API＋Gemini 或 ChatGPT）。當使用者要做長輩服藥提醒、餐後血糖提醒、預約／報到提醒等「定時推播 → 按鈕回報 → 沒回應再提醒 → 通知家屬或群組」的 LINE App，或提到「line-cloudflare-app-builder」時使用。內含骨架、設定腳本、驗證腳本、畫面預覽與人工檢核清單。
-version: 0.7.0
+version: 0.7.1
 ---
 
 # LINE × Cloudflare App Builder
